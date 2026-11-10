@@ -4,6 +4,13 @@ import cv2
 import glob
 from ultralytics import YOLO
 
+#
+
+
+#Link do modelo utilizado-----
+#Link: https://universe.roboflow.com/marcel-gigena-qbwck/gun-detection-uoebv/
+#-----------------------------
+
 # Videos para teste do yt----
 #Ladrao armamento pesado: 'https://www.youtube.com/watch?v=A46ppMPwhKE'
 #Gato disparando fuzil: 'https://www.youtube.com/watch?v=vMF-BfwQyZM'
@@ -24,7 +31,7 @@ with yt_dlp.YoutubeDL(ydl_opts) as ydl:
 model = YOLO("yolov8n.pt") #trocar pelo modelito certo
 cap = cv2.VideoCapture(stream_url)
 
-def label():
+#def label():
    
 
 frame_window = st.image([])
