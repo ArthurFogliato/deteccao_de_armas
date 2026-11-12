@@ -1,57 +1,31 @@
-import streamlit as st
-import yt_dlp #baixar video do youtube
-import cv2
-import glob
-from ultralytics import YOLO
-
-#
-
-
 #Link do modelo utilizado-----
 #Link: https://universe.roboflow.com/marcel-gigena-qbwck/gun-detection-uoebv/
 #-----------------------------
 
-# Videos para teste do yt----
-#Ladrao armamento pesado: 'https://www.youtube.com/watch?v=A46ppMPwhKE'
-#Gato disparando fuzil: 'https://www.youtube.com/watch?v=vMF-BfwQyZM'
-#Assassino armamento leve: 'https://www.youtube.com/watch?v=irQMaSFR6CI'
-#BAZUCA: 'https://www.youtube.com/watch?v=yAJAoUQ3gyI'
-#----------------------------
 
-#Baixar do yt----
-video_url = 'https://www.youtube.com/watch?v=vMF-BfwQyZM'
-ydl_opts = {'format': 'best[ext=mp4]'}
+import streamlit
+import cv2
+from ultralytics import YOLO
 
-with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-  info = ydl.extract_info(video_url, download=False)
-  stream_url = info['url']
-#----------------
+streamlit.set_page_config(layout="wide")
 
 #Configuaracao modelo-----
-model = YOLO("yolov8n.pt") #trocar pelo modelito certo
-cap = cv2.VideoCapture(stream_url)
-
+model = YOLO("best.pt") #trocar pelo modelito certo
+cap = cv2.VideoCapture(0)
 #def label():
-   
-
-frame_window = st.image([])
-#----------------
+frame_window = streamlit.image([])
+#-------------------------
 
 #Configuracao pagina-----
-
-st.set_page_config(layout="wide")
-
-camera, dados = st.columns(2, border=True)
-
+camera, dados = streamlit.columns(2, border=True)
 #------------------------
-
-#Pagina principal---
+#Pagina principal--------
 with camera:
-    st.title("Vídeo")
-    st.video()
+    streamlit.title("Vídeo")
+    frame_window.image(frame)
         
 with dados:
-    st.title("Dados")
-    st.text("Tipo de arma:")
-#-------------------
+    streamlit.title("Dados")
+    streamlit.text("Tipo de arma:")
+#------------------------
 
