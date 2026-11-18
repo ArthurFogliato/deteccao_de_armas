@@ -17,8 +17,6 @@ if not os.path.exists(yaml_path):
     print("Não foi encontrado o arquivo %s", yaml_path);
     exit(0)
 
-
-
 print("Treinamento YOLO")
 
 model = YOLO('yolo26n.pt')
