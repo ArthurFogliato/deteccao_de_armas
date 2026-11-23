@@ -15,7 +15,7 @@ os.makedirs("gravacoes", exist_ok=True)
 FPS = 12 # ajustar conforme testes
 
 streamlit.set_page_config(layout="wide")
-model = YOLO("runs/detect/dataset/runs/Deteccao_de_armas-8/weights/best.pt")
+model = YOLO("/runs.v2/detect/dataset.v2/runs/Deteccao_de_armas/weights/best.pt")
 
 def fechar_video():
     streamlit.session_state.video_salvo = False
