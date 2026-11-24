@@ -1,6 +1,6 @@
 # pendencias:
 # trocar o dataset por um de cameras de seguranca
-# ultima atualizacao: 19/11 por arthur
+# ultima atualizacao: 24/11/26 por arthur
 
 import streamlit
 import cv2
@@ -8,6 +8,7 @@ from ultralytics import YOLO
 import imageio
 from collections import deque
 import os
+import yt_dlp
 
 # se nao existir, cria uma pasta gravacoes pra salvar os videos
 os.makedirs("gravacoes", exist_ok=True)
@@ -32,8 +33,9 @@ if "video_salvo" not in streamlit.session_state:
 with streamlit.sidebar:
     streamlit.title("Controles")
     ligada = streamlit.toggle("on/off camera", value=True)
+    camera_escolhida = streamlit.selectbox("câmera", [0, 1, 2, 3], disabled=not ligada)
+    bounding_boxes = streamlit.toggle("mostrar bounding boxes", value=True) 
     habilitar_salvamento = streamlit.toggle("habilitar salvamento")
-    bounding_boxes = streamlit.toggle("mostrar bounding boxes", value=True)
     salvar = streamlit.button("salvar últimos 15 segundos", disabled=not habilitar_salvamento)
 
 if not habilitar_salvamento:
@@ -69,40 +71,46 @@ else:
 
 # se o toggle de camera estiver habilitado:
 if ligada:
-    cap = cv2.VideoCapture(0)
-    while cap.isOpened():
-        badge.markdown(":red-badge[● AO VIVO]")
-        ok, frame = cap.read()
-        if not ok:
-            break
+    cap = cv2.VideoCapture(camera_escolhida)
+    if not cap.isOpened():
+        streamlit.error(f"Câmera {camera_escolhida} não encontrada") 
 
-        resultados = model(frame, conf=0.75, verbose=False)
-        frame_anotado = resultados[0].plot(boxes=bounding_boxes)
-        frame_anotado = cv2.cvtColor(frame_anotado, cv2.COLOR_BGR2RGB)
-        if habilitar_salvamento:
-            buffer.append(frame_anotado)
+    try:
+        while cap.isOpened():
+            badge.markdown(":red-badge[● AO VIVO]")
 
-        frame_window.image(frame_anotado, width="stretch")
 
-        caixas = resultados[0].boxes
+            ok, frame = cap.read()
+            if not ok:
+                break
 
-        if len(caixas) == 0:
-            nome_box.markdown("### Nenhuma detecção")
-            barra_box.empty()
-            outros_box.empty()
-        else:
-            nome = model.names[int(caixas[0].cls[0])]
-            confianca = float(caixas[0].conf[0])
-            nome_box.markdown(f"# {nome.upper()}")
-            barra_box.progress(confianca, text=f"{int(confianca * 100)}% de confiança")
+            resultados = model(frame, conf=0.7, verbose=False)
+            frame_anotado = resultados[0].plot(boxes=bounding_boxes)
+            frame_anotado = cv2.cvtColor(frame_anotado, cv2.COLOR_BGR2RGB)
+            if habilitar_salvamento:
+                buffer.append(frame_anotado)
 
-            outros = ""
-            for caixa in caixas[1:]:
-                nome_extra = model.names[int(caixa.cls[0])]
-                conf_extra = int(float(caixa.conf[0]) * 100)
-                outros += f"**{nome_extra.upper()}**: {conf_extra}%  \n"
-            outros_box.markdown(outros)
+            frame_window.image(frame_anotado, width="stretch")
 
-    cap.release()
+            caixas = resultados[0].boxes
+
+            if len(caixas) == 0:
+                nome_box.markdown("### Nenhuma detecção")
+                barra_box.empty()
+                outros_box.empty()
+            else:
+                nome = model.names[int(caixas[0].cls[0])]
+                confianca = float(caixas[0].conf[0])
+                nome_box.markdown(f"# {nome.upper()}")
+                barra_box.progress(confianca, text=f"{int(confianca * 100)}% de confiança")
+
+                outros = ""
+                for caixa in caixas[1:]:
+                    nome_extra = model.names[int(caixa.cls[0])]
+                    conf_extra = int(float(caixa.conf[0]) * 100)
+                    outros += f"**{nome_extra.upper()}**: {conf_extra}%  \n"
+                outros_box.markdown(outros)
+    finally: 
+        cap.release()
 else:
     badge.markdown(":gray-badge[● CAMERA DESLIGADA]")
